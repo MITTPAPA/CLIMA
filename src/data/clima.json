@@ -1,0 +1,32 @@
+[
+  {
+    "mes": "Ene",
+    "temperatura": 18,
+    "lluvia": 120
+  },
+  {
+    "mes": "Feb",
+    "temperatura": 20,
+    "lluvia": 150
+  },
+  {
+    "mes": "Mar",
+    "temperatura": 24,
+    "lluvia": 180
+  },
+  {
+    "mes": "Abr",
+    "temperatura": 26,
+    "lluvia": 210
+  },
+  {
+    "mes": "May",
+    "temperatura": 29,
+    "lluvia": 170
+  },
+  {
+    "mes": "Jun",
+    "temperatura": 31,
+    "lluvia": 90
+  }
+]

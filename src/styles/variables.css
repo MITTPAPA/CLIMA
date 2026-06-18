@@ -1,0 +1,12 @@
+:root {
+  --primary: #002d86;
+  --secondary: #b5e61d;
+  --dark: #0a1e4f;
+  --text: #222222;
+  --bg: #f7f7f7;
+
+  --radius: 18px;
+  --shadow: 0 8px 20px rgba(0,0,0,.08);
+
+  --font: "Montserrat", sans-serif;
+}
