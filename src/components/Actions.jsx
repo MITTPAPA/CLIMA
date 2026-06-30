@@ -187,7 +187,7 @@ export default function Actions() {
   return (
     <>
       <section className="actions container" id="acciones">
-        <h2>4 ACCIONES PARA EL CULTIVO</h2>
+        <h2>PLAN DE ACCIÓN</h2>
 
         <div className="cards">
           {cardsData.map((item, index) => (
