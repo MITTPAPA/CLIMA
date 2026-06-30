@@ -7,8 +7,6 @@ export default function ABCNino() {
 
       <div className="abc-left">
 
-        <span>2.</span>
-
         <h2>
           ABC DE
           <br />
