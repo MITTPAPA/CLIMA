@@ -33,6 +33,7 @@ export default function Navbar() {
           <li onClick={() => scrollToSection("reportes")}>
             Reportes Climáticos
           </li>
+          
 
           <li onClick={() => scrollToSection("ayuda")}>
             Ayuda al Productor
