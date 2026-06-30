@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
   Legend,
+  LineChart,
 } from "recharts";
 
 const municipios = [
@@ -371,300 +372,368 @@ const PREC_REFERENCIA = [
 ];
 
 function clasificar(pct) {
-  if (pct >= -5 && pct <= 5) return "normal";
-  if (pct >= -15 && pct <= -6) return "deficit_leve";
-  if (pct <= -16) return "deficit_severo";
-  if (pct >= 6 && pct <= 15) return "exceso_leve";
-  return "exceso_severo";
-}
+  if (pct < -50) return "deficit_extremo";
 
+  if (pct >= -50 && pct < -30) return "deficit_severo";
+
+  if (pct >= -30 && pct < -10) return "deficit_moderado";
+
+  if (pct >= -10 && pct <= 15) return "normal";
+
+  if (pct > 15 && pct <= 35) return "exceso_moderado";
+
+  if (pct > 35) return "exceso_severo";
+
+  return "desconocido";
+}
 const SEMAFORO = {
+  deficit_extremo: {
+    color: "#7f1d1d",
+    bg: "#fff1f2",
+    borde: "#f87171",
+    badgeBg: "#dc2626",
+    etiqueta: "🔴 Déficit extremo",
+    texto: "Riesgo crítico de sequía.",
+  },
+
+  deficit_severo: {
+    color: "#9a3412",
+    bg: "#fff7ed",
+    borde: "#fdba74",
+    badgeBg: "#ea580c",
+    etiqueta: "🟠 Déficit severo",
+    texto: "Alto riesgo de estrés hídrico.",
+  },
+
+  deficit_moderado: {
+    color: "#92400e",
+    bg: "#fffbeb",
+    borde: "#fde68a",
+    badgeBg: "#ca8a04",
+    etiqueta: "🟡 Déficit moderado",
+    texto: "Condiciones secas que requieren seguimiento.",
+  },
+
   normal: {
     color: "#166534",
     bg: "#f0fdf4",
     borde: "#86efac",
     badgeBg: "#16a34a",
-    etiqueta: "✅ Normal",
-    texto: "Precipitación dentro de la media esperada",
+    etiqueta: "🟢 Normal",
+    texto: "Variación dentro del comportamiento esperado.",
   },
-  deficit_leve: {
-    color: "#92400e",
-    bg: "#fffbeb",
-    borde: "#fcd34d",
-    badgeBg: "#d97706",
-    etiqueta: "⚠️ Déficit leve",
-    texto: "Leve déficit de lluvia respecto a la media histórica",
-  },
-  deficit_severo: {
-    color: "#7f1d1d",
-    bg: "#fff1f2",
-    borde: "#fca5a5",
-    badgeBg: "#dc2626",
-    etiqueta: "🚨 Déficit severo",
-    texto: "Déficit severo de lluvia — riesgo de estrés hídrico",
-  },
-  exceso_leve: {
-    color: "#581c87",
+
+  exceso_moderado: {
+    color: "#6b21a8",
     bg: "#faf5ff",
     borde: "#d8b4fe",
     badgeBg: "#9333ea",
-    etiqueta: "🟣 Exceso leve",
-    texto: "Leve exceso de lluvia respecto a la media histórica",
+    etiqueta: "🟣 Exceso moderado",
+    texto: "Lluvias superiores a lo normal.",
   },
+
   exceso_severo: {
     color: "#1e3a8a",
     bg: "#eff6ff",
     borde: "#93c5fd",
     badgeBg: "#2563eb",
-    etiqueta: "🌧️ Exceso severo",
-    texto: "Exceso severo de lluvia — riesgo de encharcamiento",
+    etiqueta: "🔵 Exceso severo",
+    texto: "Riesgo de encharcamiento e incremento de enfermedades.",
   },
 };
 
 const DOT_ICONOS = {
+  deficit_extremo: "🔴",
+  deficit_severo: "🟠",
+  deficit_moderado: "🟡",
   normal: "🟢",
-  deficit_leve: "🟡",
-  deficit_severo: "🔴",
-  exceso_leve: "🟣",
+  exceso_moderado: "🟣",
   exceso_severo: "🔵",
 };
-
 const BANNER_ICONOS = {
+  deficit_extremo: "🚨",
+  deficit_severo: "🟠",
+  deficit_moderado: "⚠️",
   normal: "✅",
-  deficit_leve: "⚠️",
-  deficit_severo: "🚨",
-  exceso_leve: "🟣",
+  exceso_moderado: "🟣",
   exceso_severo: "🌧️",
 };
 
 const MODAL_CONTENIDO = {
-  normal: {
-    titulo: "Condiciones Favorables",
-    subtitulo: "Ambiente óptimo para el desarrollo del cultivo",
-    icono: "✅",
+  deficit_extremo: {
+    titulo: "Déficit Extremo de Lluvia",
+    subtitulo:
+      "Precipitación inferior al 50% de la media histórica — riesgo crítico de sequía",
+    icono: "🔴",
     secciones: [
       {
-        icono: "☀️",
-        titulo: "Clima",
+        icono: "🔥",
+        titulo: "Riesgos climáticos",
         items: [
-          "Clima estable y adecuado para el cultivo de papa",
-          "Temperaturas dentro del rango óptimo (10–18 °C)",
-          "Precipitación equilibrada sin excesos ni déficits",
+          "Precipitación inferior al 50% respecto a la media histórica.",
+          "Riesgo crítico de sequía con fuerte afectación del cultivo.",
+          "Alta probabilidad de pérdidas en floración, tuberización y llenado de tubérculos.",
+        ],
+      },
+      {
+        icono: "💧",
+        titulo: "Manejo del agua",
+        items: [
+          "Prioriza el riego únicamente en los lotes con mayor potencial productivo.",
+          "Implementa medidas para reducir la evaporación, como coberturas vegetales o mulch.",
+          "Evita labores que incrementen la pérdida de humedad del suelo.",
+        ],
+      },
+      {
+        icono: "🪲",
+        titulo: "Sanidad del cultivo",
+        items: [
+          "Incrementa el monitoreo de ácaros, trips y polilla guatemalteca.",
+          "Revisa síntomas de marchitez permanente y aborto de tubérculos.",
+          "Evita aplicaciones innecesarias que aumenten el estrés de las plantas.",
+        ],
+      },
+      {
+        icono: "🆘",
+        titulo: "Acciones prioritarias",
+        items: [
+          "Activa planes de contingencia frente a sequía.",
+          "Documenta las afectaciones para posibles apoyos o seguros agropecuarios.",
+          "Solicita acompañamiento técnico de FEDEPAPA para definir estrategias de manejo.",
+        ],
+      },
+    ],
+    consejo:
+      "El déficit extremo representa una situación crítica. Prioriza la conservación del recurso hídrico, protege las plantas con mayor potencial y busca asesoría técnica inmediata.",
+  },
+
+  deficit_severo: {
+    titulo: "Déficit Severo de Lluvia",
+    subtitulo: "Precipitación entre 30% y 50% por debajo de la media histórica",
+    icono: "🟠",
+    secciones: [
+      {
+        icono: "🌤️",
+        titulo: "Condiciones climáticas",
+        items: [
+          "Precipitación entre 30% y 50% inferior a la media histórica.",
+          "Alto riesgo de estrés hídrico en etapas críticas del cultivo.",
+          "Disminuye la disponibilidad de agua en el suelo.",
+        ],
+      },
+      {
+        icono: "💧",
+        titulo: "Manejo del agua",
+        items: [
+          "Programa riegos oportunos cuando exista disponibilidad.",
+          "Conserva la humedad mediante coberturas vegetales.",
+          "Evita pérdidas de agua por escorrentía y evaporación.",
         ],
       },
       {
         icono: "🌱",
-        titulo: "Siembra y labores",
+        titulo: "Manejo agronómico",
         items: [
-          "Buen momento para preparar suelos y sembrar",
-          "Condiciones ideales para aplicar fertilizantes al suelo",
-          "Aprovecha para avanzar en labores de aporque y deshierba",
+          "Ajusta la fertilización según la humedad disponible.",
+          "Evita labores intensivas que compacten el suelo seco.",
+          "Monitorea el desarrollo de tubérculos y el vigor de las plantas.",
+        ],
+      },
+      {
+        icono: "📋",
+        titulo: "Recomendaciones",
+        items: [
+          "Realiza seguimiento frecuente al estado hídrico del cultivo.",
+          "Consulta los pronósticos climáticos antes de programar labores.",
+          "Mantén comunicación con el asistente técnico de FEDEPAPA.",
+        ],
+      },
+    ],
+    consejo:
+      "El déficit severo puede afectar significativamente el rendimiento. Actúa de manera preventiva para conservar la humedad del suelo y optimizar el uso del agua.",
+  },
+
+  deficit_moderado: {
+    titulo: "Déficit Moderado de Lluvia",
+    subtitulo: "Precipitación entre 10% y 30% por debajo de la media histórica",
+    icono: "🟡",
+    secciones: [
+      {
+        icono: "🌤️",
+        titulo: "Condiciones climáticas",
+        items: [
+          "Precipitación ligeramente inferior a la media histórica.",
+          "Se presentan períodos secos más prolongados entre lluvias.",
+          "Es recomendable vigilar continuamente la humedad del suelo.",
+        ],
+      },
+      {
+        icono: "💧",
+        titulo: "Manejo del agua",
+        items: [
+          "Evalúa la necesidad de riego suplementario.",
+          "Conserva la humedad mediante residuos vegetales o mulch.",
+          "Prioriza el agua en las etapas de tuberización y llenado.",
+        ],
+      },
+      {
+        icono: "🔍",
+        titulo: "Monitoreo",
+        items: [
+          "Observa signos tempranos de marchitez.",
+          "Realiza seguimiento al crecimiento y desarrollo del cultivo.",
+          "Registra las precipitaciones ocurridas en la finca.",
+        ],
+      },
+      {
+        icono: "📅",
+        titulo: "Planificación",
+        items: [
+          "Programa las labores agrícolas en función del pronóstico climático.",
+          "Ajusta las aplicaciones de fertilizantes según la disponibilidad de humedad.",
+          "Mantén un monitoreo permanente de las condiciones meteorológicas.",
+        ],
+      },
+    ],
+    consejo:
+      "El déficit moderado requiere seguimiento constante. Un manejo oportuno del agua y el monitoreo del cultivo ayudarán a prevenir pérdidas de rendimiento.",
+  },
+  normal: {
+    titulo: "Condiciones Favorables",
+    subtitulo: "Precipitación dentro del comportamiento esperado (-10% a +15%)",
+    icono: "🟢",
+    secciones: [
+      {
+        icono: "☀️",
+        titulo: "Condiciones climáticas",
+        items: [
+          "La precipitación se encuentra dentro del rango esperado para la época.",
+          "Las condiciones favorecen el crecimiento y desarrollo del cultivo.",
+          "El balance hídrico es adecuado para la mayoría de las labores agrícolas.",
+        ],
+      },
+      {
+        icono: "🌱",
+        titulo: "Siembra y manejo",
+        items: [
+          "Buen momento para establecer nuevas siembras.",
+          "Continúa con las labores de fertilización y aporque según el plan de manejo.",
+          "Mantén el monitoreo rutinario del cultivo.",
         ],
       },
       {
         icono: "🚜",
         titulo: "Manejo agronómico",
         items: [
-          "Aplica fungicidas preventivos mientras el clima lo permita",
-          "Realiza monitoreo rutinario de plagas y enfermedades",
-          "Programa riegos de mantenimiento si es necesario",
+          "Realiza controles preventivos de plagas y enfermedades.",
+          "Mantén el seguimiento de la humedad del suelo.",
+          "Programa riegos únicamente si las condiciones locales lo requieren.",
         ],
       },
       {
         icono: "📦",
         titulo: "Cosecha y poscosecha",
         items: [
-          "Momento propicio para cosechar si el cultivo está maduro",
-          "Condiciones favorables para el secado y almacenamiento",
-          "Evalúa calidad del tubérculo antes de comercializar",
+          "Las condiciones son favorables para cosecha y transporte.",
+          "Realiza almacenamiento en condiciones adecuadas de ventilación.",
+          "Verifica la calidad de los tubérculos antes de la comercialización.",
         ],
       },
     ],
     consejo:
-      "Aprovecha estas condiciones para avanzar en todas las labores del cultivo. Infórmate, planifica y toma mejores decisiones para una papa sana y productiva.",
+      "Las condiciones actuales son favorables para el cultivo de papa. Continúa con las labores programadas y mantén el monitoreo permanente del clima y del estado del cultivo.",
   },
-  deficit_leve: {
-    titulo: "Déficit Leve de Lluvia",
-    subtitulo:
-      "Precipitación algo por debajo de la media — vigila la humedad del suelo",
-    icono: "⚠️",
-    secciones: [
-      {
-        icono: "🌤️",
-        titulo: "Clima",
-        items: [
-          "Precipitación entre 6% y 15% por debajo de la media histórica",
-          "Posible alargamiento de los períodos secos entre lluvias",
-          "Monitorea la humedad del suelo en las primeras horas del día",
-        ],
-      },
-      {
-        icono: "💧",
-        titulo: "Manejo del agua",
-        items: [
-          "Evalúa riego de apoyo en lotes sin humedad residual suficiente",
-          "Prioriza el riego en etapas críticas: tuberización y llenado",
-          "Considera coberturas o mulch para conservar humedad del suelo",
-        ],
-      },
-      {
-        icono: "🔍",
-        titulo: "Monitoreo del cultivo",
-        items: [
-          "Revisa signos de marchitez temprana en horas de mayor calor",
-          "Observa el desarrollo radicular y la formación de tubérculos",
-          "Lleva registro diario de las precipitaciones en finca",
-        ],
-      },
-      {
-        icono: "🗓️",
-        titulo: "Planificación",
-        items: [
-          "Ajusta el calendario de fertilización según disponibilidad de agua",
-          "Ten previsto un plan de riego de contingencia",
-          "Consulta con tu asistente técnico antes de decisiones clave",
-        ],
-      },
-    ],
-    consejo:
-      "Un déficit leve no es crítico, pero amerita seguimiento cercano. Anticípate revisando el estado hídrico del suelo y ajustando el riego donde sea posible.",
-  },
-  deficit_severo: {
-    titulo: "Déficit Severo de Lluvia",
-    subtitulo: "Escasez hídrica crítica — riesgo alto de estrés en el cultivo",
-    icono: "🚨",
-    secciones: [
-      {
-        icono: "🔥",
-        titulo: "Riesgos climáticos",
-        items: [
-          "Precipitación 16% o más por debajo de la media histórica",
-          "Alto riesgo de estrés hídrico en floración y tuberización",
-          "Suelos secos favorecen la compactación y dificultan la absorción de nutrientes",
-        ],
-      },
-      {
-        icono: "🪲",
-        titulo: "Plagas y enfermedades",
-        items: [
-          "Condiciones secas favorecen la proliferación de polilla guatemalteca",
-          "Mayor susceptibilidad del cultivo ante ácaros y trips",
-          "Reduce aplicaciones foliares innecesarias para no estresar la planta",
-        ],
-      },
-      {
-        icono: "💧",
-        titulo: "Manejo del agua",
-        items: [
-          "Prioriza el riego disponible hacia las etapas más sensibles del cultivo",
-          "Evita el aporque en suelo extremadamente seco — daña raíces y estolones",
-          "Considera riego nocturno o de madrugada para reducir la evaporación",
-        ],
-      },
-      {
-        icono: "🆘",
-        titulo: "Acciones urgentes",
-        items: [
-          "Activa sistemas de riego de emergencia si están disponibles",
-          "Documenta el estado del cultivo para gestión de seguros agropecuarios",
-          "Contacta a FEDEPAPA y a tu asistente técnico para evaluar alternativas",
-        ],
-      },
-    ],
-    consejo:
-      "Un déficit severo puede comprometer seriamente el rendimiento. Prioriza el agua disponible hacia las etapas críticas y busca asesoría técnica oportuna.",
-  },
-  exceso_leve: {
-    titulo: "Exceso Leve de Lluvia",
-    subtitulo:
-      "Precipitación algo por encima de la media — mantente atento a la humedad",
+
+  exceso_moderado: {
+    titulo: "Exceso Moderado de Lluvia",
+    subtitulo: "Precipitación entre 15% y 35% por encima de la media histórica",
     icono: "🟣",
     secciones: [
       {
         icono: "🌦️",
-        titulo: "Clima",
+        titulo: "Condiciones climáticas",
         items: [
-          "Precipitación entre 6% y 15% por encima de la media histórica",
-          "Mayor humedad relativa y suelos con menor capacidad de drenaje",
-          "Revisa el pronóstico para anticipar lluvias consecutivas",
+          "La precipitación supera moderadamente la media histórica.",
+          "Incrementa la humedad del suelo y del ambiente.",
+          "Existe mayor probabilidad de lluvias continuas durante varios días.",
         ],
       },
       {
-        icono: "🔍",
-        titulo: "Monitoreo del cultivo",
+        icono: "💧",
+        titulo: "Drenaje y manejo del agua",
         items: [
-          "Inspecciona el follaje en busca de manchas húmedas o lesiones iniciales",
-          "Verifica que los surcos mantengan buen drenaje superficial",
-          "Observa el color y firmeza del follaje ante el exceso de humedad",
-        ],
-      },
-      {
-        icono: "⚗️",
-        titulo: "Aplicaciones con precaución",
-        items: [
-          "Prefiere fungicidas preventivos ante el riesgo creciente de gota",
-          "Evita la fertilización foliar si se esperan lluvias en las próximas horas",
-          "Espacia las aplicaciones según las ventanas climáticas más secas",
-        ],
-      },
-      {
-        icono: "🗓️",
-        titulo: "Planificación",
-        items: [
-          "Revisa y despeja canales de drenaje antes de lluvias adicionales",
-          "Ajusta las labores de campo a los días con menor humedad",
-          "Consulta con tu asistente técnico si el exceso se prolonga",
-        ],
-      },
-    ],
-    consejo:
-      "Un exceso leve de lluvia exige vigilancia preventiva. Refuerza el drenaje y prioriza los fungicidas preventivos para evitar que el problema escale.",
-  },
-  exceso_severo: {
-    titulo: "Exceso Severo de Lluvia",
-    subtitulo:
-      "Lluvias muy por encima de lo normal — riesgo de encharcamiento y pudrición",
-    icono: "🌧️",
-    secciones: [
-      {
-        icono: "🌨️",
-        titulo: "Riesgos climáticos",
-        items: [
-          "Precipitación más de 15% por encima de la media histórica",
-          "Alta probabilidad de encharcamiento y saturación del suelo",
-          "Granizo posible en zonas de ladera — protege los cultivos jóvenes",
+          "Verifica el funcionamiento de zanjas y canales de drenaje.",
+          "Evita acumulaciones de agua en las zonas bajas del lote.",
+          "Mantén limpios los sistemas de evacuación de aguas lluvias.",
         ],
       },
       {
         icono: "🪲",
+        titulo: "Sanidad del cultivo",
+        items: [
+          "Incrementa el monitoreo de gota (Phytophthora infestans).",
+          "Observa síntomas iniciales de enfermedades causadas por exceso de humedad.",
+          "Programa aplicaciones preventivas cuando las condiciones lo permitan.",
+        ],
+      },
+      {
+        icono: "📅",
+        titulo: "Planificación",
+        items: [
+          "Programa las labores agrícolas en los períodos de menor precipitación.",
+          "Evita el ingreso de maquinaria cuando el suelo presente alta humedad.",
+          "Consulta permanentemente el pronóstico climático.",
+        ],
+      },
+    ],
+    consejo:
+      "El exceso moderado de lluvia requiere vigilancia permanente. Un buen manejo del drenaje y la prevención de enfermedades ayudarán a reducir los riesgos para el cultivo.",
+  },
+
+  exceso_severo: {
+    titulo: "Exceso Severo de Lluvia",
+    subtitulo: "Precipitación superior al 35% de la media histórica",
+    icono: "🔵",
+    secciones: [
+      {
+        icono: "🌧️",
+        titulo: "Riesgos climáticos",
+        items: [
+          "La precipitación supera ampliamente la media histórica.",
+          "Existe alto riesgo de encharcamiento y saturación del suelo.",
+          "Puede presentarse pérdida de oxígeno en la zona radicular y afectación del desarrollo del cultivo.",
+        ],
+      },
+      {
+        icono: "🦠",
         titulo: "Plagas y enfermedades",
         items: [
-          "Alta humedad: riesgo crítico de gota (Phytophthora infestans)",
-          "Mayor probabilidad de pudrición radicular y de tubérculos",
-          "Evita aplicaciones foliares — baja eficacia y riesgo de lavado por lluvia",
+          "Incrementa significativamente el riesgo de gota (Phytophthora infestans).",
+          "Mayor probabilidad de pudriciones de raíces y tubérculos.",
+          "Las aplicaciones foliares pueden perder eficacia debido al lavado por lluvia.",
         ],
       },
       {
         icono: "🚫",
         titulo: "Labores a evitar",
         items: [
-          "Evita siembras nuevas hasta que el suelo drene adecuadamente",
-          "Suspende el aporque y el tránsito de maquinaria en suelos saturados",
-          "No apliques fertilizantes al suelo mientras persista el encharcamiento",
+          "Evita realizar siembras en suelos saturados.",
+          "Suspende el tránsito de maquinaria para evitar compactación.",
+          "No realices fertilizaciones mientras persistan condiciones de encharcamiento.",
         ],
       },
       {
         icono: "🆘",
-        titulo: "Acciones urgentes",
+        titulo: "Acciones prioritarias",
         items: [
-          "Activa o revisa sistemas de drenaje y canales de desfogue",
-          "Documenta daños para gestión de seguros agropecuarios",
-          "Contacta de inmediato a FEDEPAPA y autoridades locales",
+          "Activa y revisa los sistemas de drenaje.",
+          "Monitorea continuamente las zonas con mayor acumulación de agua.",
+          "Solicita acompañamiento técnico si las lluvias persisten durante varios días consecutivos.",
         ],
       },
     ],
     consejo:
-      "El exceso severo de lluvia puede comprometer la cosecha por pudrición y enfermedades. Refuerza el drenaje y actúa rápido para minimizar pérdidas.",
+      "El exceso severo de lluvia puede generar pérdidas importantes por encharcamiento y enfermedades. Prioriza el drenaje del lote y el monitoreo fitosanitario para reducir el impacto sobre el cultivo.",
   },
 };
 
@@ -776,7 +845,6 @@ const GLOBAL_CSS = `
   .dp-btn-update:active { transform: scale(0.97); }
   .dp-btn-update:disabled { opacity: 0.55; cursor: not-allowed; }
 
-  /* ubicación pill */
   .dp-location-pill {
     display: inline-flex;
     align-items: center;
@@ -895,6 +963,49 @@ const GLOBAL_CSS = `
   .dp-chart-section h3 { font-size: 20px; font-weight: 700; color: var(--brand); margin-bottom: 4px; }
   .dp-chart-section p { font-size: 16px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.5; }
 
+  /* ── DIVIDER ── */
+  .dp-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 28px 0 22px;
+  }
+  .dp-section-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .dp-section-divider-label {
+    background: var(--brand);
+    color: #fff;
+    border-radius: 20px;
+    padding: 5px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  /* ── CLIMATICO KPIs ── */
+  .dc-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .dc-kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    text-align: center;
+    transition: box-shadow 0.2s;
+  }
+  .dc-kpi:hover { box-shadow: var(--shadow-md); }
+  .dc-kpi-icon { font-size: 24px; display: block; margin-bottom: 8px; }
+  .dc-kpi-value { font-size: 20px; font-weight: 800; color: var(--brand); line-height: 1; margin-bottom: 4px; }
+  .dc-kpi-label { font-size: 11px; color: var(--text-hint); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+
   /* ── TABLE SECTION ── */
   .dp-table-section {
     background: var(--surface);
@@ -916,9 +1027,7 @@ const GLOBAL_CSS = `
     border-collapse: collapse;
     font-size: 16px;
   }
-  table.dp-table thead tr {
-    background: var(--brand);
-  }
+  table.dp-table thead tr { background: var(--brand); }
   table.dp-table thead th {
     padding: 11px 14px;
     text-align: center;
@@ -949,7 +1058,6 @@ const GLOBAL_CSS = `
     color: var(--brand-dark);
   }
 
-  /* badge semáforo */
   .dp-badge {
     display: inline-flex;
     align-items: center;
@@ -1051,6 +1159,7 @@ const GLOBAL_CSS = `
     .dp-select { width: 100%; min-width: 0; }
     .dp-btn-update { width: 100%; justify-content: center; padding: 11px; }
     .dp-kpis { grid-template-columns: 1fr 1fr; }
+    .dc-kpis { grid-template-columns: 1fr 1fr; }
     .dp-tabs { width: 100%; justify-content: center; }
     .sm-backdrop { padding: 0; align-items: flex-end; }
     .sm-modal { max-height: 92vh; border-radius: 20px 20px 0 0; }
@@ -1059,10 +1168,11 @@ const GLOBAL_CSS = `
   }
   @media (max-width: 400px) {
     .dp-kpis { grid-template-columns: 1fr; }
+    .dc-kpis { grid-template-columns: 1fr; }
   }
 `;
 
-/* ── TOOLTIP ─────────────────────────────────────────── */
+/* ── TOOLTIP PRECIPITACIÓN ─────────────────────────── */
 function TooltipPersonalizado({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
@@ -1126,14 +1236,6 @@ function SemaforoModal({ estado, contexto, onClose }) {
       document.body.style.overflow = "";
     };
   }, [onClose]);
-
-  const gradients = {
-    normal: "#f0fdf4",
-    deficit_leve: "#fffbeb",
-    deficit_severo: "#fff1f2",
-    exceso_leve: "#faf5ff",
-    exceso_severo: "#eff6ff",
-  };
 
   return (
     <div className="sm-backdrop" onClick={onClose}>
@@ -1275,12 +1377,229 @@ function SemaforoModal({ estado, contexto, onClose }) {
   );
 }
 
+/* ── SUBCOMPONENTE: Dashboard Climático Diario ───────── */
+function DashboardClimatico({ municipio, mes, anio }) {
+  const [data, setData] = useState([]);
+  const [cargandoClimatico, setCargandoClimatico] = useState(false);
+  const [promedioAnual, setPromedioAnual] = useState(null);
+
+  // Mes efectivo: si viene "todos" usamos el mes actual
+  const mesEfectivo = useMemo(() => {
+    if (mes !== "todos") return mes;
+    return String(new Date().getMonth() + 1).padStart(2, "0");
+  }, [mes]);
+
+  useEffect(() => {
+    cargarDatos();
+  }, [municipio, mesEfectivo, anio]);
+
+  useEffect(() => {
+    calcularPromedioAnual();
+  }, [municipio, anio]);
+
+  const cargarDatos = async () => {
+    setCargandoClimatico(true);
+    try {
+      const inicio = `${anio}-${mesEfectivo}-01`;
+      const ultimoDia = new Date(
+        parseInt(anio),
+        parseInt(mesEfectivo),
+        0,
+      ).getDate();
+      const fin = `${anio}-${mesEfectivo}-${String(ultimoDia).padStart(2, "0")}`;
+      const hoy = new Date().toISOString().split("T")[0];
+      const finEfectivo = fin > hoy ? hoy : fin;
+
+      if (inicio > hoy) {
+        setData([]);
+        setCargandoClimatico(false);
+        return;
+      }
+
+      const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${municipio.lat}&longitude=${municipio.lon}&start_date=${inicio}&end_date=${finEfectivo}&daily=temperature_2m_mean,precipitation_sum,wind_speed_10m_max,relative_humidity_2m_mean&timezone=America/Bogota`;
+      const resp = await fetch(url);
+      const json = await resp.json();
+
+      if (!json.daily) {
+        setData([]);
+        setCargandoClimatico(false);
+        return;
+      }
+
+      const datos = json.daily.time.map((fecha, i) => ({
+        fecha,
+        temperatura: json.daily.temperature_2m_mean?.[i] ?? 0,
+        lluvia: json.daily.precipitation_sum?.[i] ?? 0,
+        humedad: json.daily.relative_humidity_2m_mean?.[i] ?? 0,
+        viento: json.daily.wind_speed_10m_max?.[i] ?? 0,
+      }));
+      setData(datos);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setCargandoClimatico(false);
+    }
+  };
+
+  const calcularPromedioAnual = async () => {
+    try {
+      const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${municipio.lat}&longitude=${municipio.lon}&start_date=${anio}-01-01&end_date=${anio}-12-31&daily=temperature_2m_mean&timezone=America/Bogota`;
+      const resp = await fetch(url);
+      const json = await resp.json();
+      if (!json.daily?.temperature_2m_mean) return;
+      const temps = json.daily.temperature_2m_mean.filter((t) => t !== null);
+      const promedio = temps.reduce((a, b) => a + b, 0) / temps.length;
+      setPromedioAnual(parseFloat(promedio.toFixed(1)));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const temperaturaPromedio = (
+    data.reduce((a, b) => a + b.temperatura, 0) / (data.length || 1)
+  ).toFixed(1);
+  const lluviaTotal = data.reduce((a, b) => a + b.lluvia, 0).toFixed(1);
+  const humedadPromedio = (
+    data.reduce((a, b) => a + b.humedad, 0) / (data.length || 1)
+  ).toFixed(1);
+  const vientoPromedio = (
+    data.reduce((a, b) => a + b.viento, 0) / (data.length || 1)
+  ).toFixed(1);
+
+  const nombreMes =
+    PREC_REFERENCIA.find((r) => r.mes === mesEfectivo)?.nombre || mesEfectivo;
+
+  return (
+    <div className="dp-chart-section">
+      <h3>
+        🌧️ Lluvia diaria — {nombreMes} {anio}
+      </h3>
+      <p>
+        {mes === "todos"
+          ? `Datos diarios del mes actual (${nombreMes} ${anio}) — al filtrar por un mes específico se actualizará automáticamente.`
+          : `Detalle diario de variables climáticas para ${nombreMes} ${anio}.`}
+      </p>
+
+      {cargandoClimatico ? (
+        <div className="dp-spinner-wrap">
+          <div className="dp-spinner" />
+          Cargando datos climáticos…
+        </div>
+      ) : data.length === 0 ? (
+        <div className="dp-empty">
+          Sin datos climáticos disponibles para este período.
+          <small>Verifica que la fecha ya haya pasado.</small>
+        </div>
+      ) : (
+        <>
+          {/* KPIs climáticos */}
+          <div className="dc-kpis">
+            <div className="dc-kpi">
+              <span className="dc-kpi-icon">🌡️</span>
+              <div className="dc-kpi-value">{temperaturaPromedio} °C</div>
+              <div className="dc-kpi-label">Temperatura media</div>
+            </div>
+            <div className="dc-kpi">
+              <span className="dc-kpi-icon">🌧️</span>
+              <div className="dc-kpi-value">{lluviaTotal} mm</div>
+              <div className="dc-kpi-label">Lluvia acumulada</div>
+            </div>
+            <div className="dc-kpi">
+              <span className="dc-kpi-icon">💧</span>
+              <div className="dc-kpi-value">{humedadPromedio}%</div>
+              <div className="dc-kpi-label">Humedad media</div>
+            </div>
+            <div className="dc-kpi">
+              <span className="dc-kpi-icon">💨</span>
+              <div className="dc-kpi-value">{vientoPromedio} km/h</div>
+              <div className="dc-kpi-label">Viento máx. medio</div>
+            </div>
+            {promedioAnual !== null && (
+              <div className="dc-kpi">
+                <span className="dc-kpi-icon">📅</span>
+                <div className="dc-kpi-value">{promedioAnual} °C</div>
+                <div className="dc-kpi-label">Promedio anual {anio}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Gráfica diaria de precipitación */}
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={data}
+              margin={{ top: 10, right: 20, left: 10, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" />
+              <XAxis
+                dataKey="fecha"
+                tickFormatter={(fecha) => fecha.split("-")[2] || fecha}
+                label={{
+                  value: "Días del mes",
+                  position: "insideBottom",
+                  offset: -10,
+                  fill: "#64748b",
+                  fontSize: 13,
+                }}
+                tick={{ fontSize: 12, fill: "#64748b" }}
+              />
+              <YAxis
+                label={{
+                  value: "Precipitación (mm)",
+                  angle: -90,
+                  position: "insideLeft",
+                  style: {
+                    textAnchor: "middle",
+                    dx: -15,
+                    fill: "#64748b",
+                    fontSize: 13,
+                  },
+                }}
+                tick={{ fontSize: 12, fill: "#64748b" }}
+                width={55}
+              />
+              <Tooltip
+                formatter={(value) => [`${value} mm`, "Precipitación diaria"]}
+                contentStyle={{
+                  background: "#0f172a",
+                  borderRadius: 10,
+                  border: "none",
+                  fontSize: 13,
+                  color: "#e2e8f0",
+                }}
+                labelStyle={{
+                  color: "#94a3b8",
+                  fontWeight: 700,
+                  marginBottom: 4,
+                }}
+              />
+              <Legend
+                verticalAlign="top"
+                height={36}
+                wrapperStyle={{ fontSize: 13 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="lluvia"
+                name="Precipitación acumulada diaria (mm)"
+                stroke="#4fc3f7"
+                strokeWidth={3}
+                dot={false}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </>
+      )}
+    </div>
+  );
+}
+
 /* ── COMPONENTE PRINCIPAL ────────────────────────────── */
 export default function DashboardPrecipitacion() {
-  const [departamento, setDepartamento] = useState("Boyacá");
-  const [municipioSeleccionado, setMunicipioSel] = useState("Tutazá");
+  const [departamento, setDepartamento] = useState("Santander");
+  const [municipioSeleccionado, setMunicipioSel] = useState("Guaca");
   const [municipio, setMunicipio] = useState(
-    () => municipios.find((m) => m.nombre === "Tutazá") || municipios[0],
+    () => municipios.find((m) => m.nombre === "Guaca") || municipios[0],
   );
   const [anio, setAnio] = useState("2026");
   const [mes, setMes] = useState("todos");
@@ -1408,7 +1727,6 @@ export default function DashboardPrecipitacion() {
   const semaforoGlobal = clasificar(pctTotal);
   const sf = SEMAFORO[semaforoGlobal];
   const ultimoAcum = dataAcumulada[dataAcumulada.length - 1];
-
   const tituloFiltro =
     mes === "todos"
       ? `Año ${anio} — todos los meses con datos`
@@ -1547,7 +1865,7 @@ export default function DashboardPrecipitacion() {
             </div>
           ) : (
             <>
-              {/* KPIs */}
+              {/* KPIs precipitación */}
               <div className="dp-kpis">
                 <div className="dp-kpi">
                   <span className="dp-kpi-icon">🌧️</span>
@@ -1650,7 +1968,7 @@ export default function DashboardPrecipitacion() {
                 </button>
               </div>
 
-              {/* Chart */}
+              {/* Chart precipitación */}
               <div className="dp-chart-section">
                 <h3>
                   {vista === "mensual"
@@ -1675,7 +1993,17 @@ export default function DashboardPrecipitacion() {
                         tick={{ fontSize: 12, fill: "#64748b" }}
                       />
                       <YAxis
-                        unit=" mm"
+                        label={{
+                          value: "Precipitación (mm)",
+                          angle: -90,
+                          position: "insideLeft",
+                          style: {
+                            textAnchor: "middle",
+                            dx: -15,
+                            fill: "#64748b",
+                            fontSize: 13,
+                          },
+                        }}
                         tick={{ fontSize: 12, fill: "#64748b" }}
                         width={55}
                       />
@@ -1722,7 +2050,17 @@ export default function DashboardPrecipitacion() {
                         tick={{ fontSize: 12, fill: "#64748b" }}
                       />
                       <YAxis
-                        unit=" mm"
+                        label={{
+                          value: "Precipitación (mm)",
+                          angle: -90,
+                          position: "insideLeft",
+                          style: {
+                            textAnchor: "middle",
+                            dx: -15,
+                            fill: "#64748b",
+                            fontSize: 13,
+                          },
+                        }}
                         tick={{ fontSize: 12, fill: "#64748b" }}
                         width={55}
                       />
@@ -1841,7 +2179,7 @@ export default function DashboardPrecipitacion() {
                         </tr>
                       </thead>
                       <tbody>
-                        {dataMensual.map((row, idx) => {
+                        {dataMensual.map((row) => {
                           const s = SEMAFORO[row.semaforo];
                           return (
                             <tr key={row.mes}>
@@ -2044,22 +2382,89 @@ export default function DashboardPrecipitacion() {
               </div>
 
               {/* Nota metodológica */}
-              <div className="dp-nota">
-                <b>Metodología:</b> La <em>media histórica</em> proviene del
-                dataset Prec ETO Spatial (valores fijos por mes). La{" "}
-                <em>precipitación real</em> es el acumulado mensual de datos
-                diarios de Open-Meteo (archive API). El <b>% vs media</b> se
-                calcula como <code>(real − media) / media × 100</code> para cada
-                período seleccionado.
-                <br />
-                🟢 −5% a +5% normal · 🟡 −6% a −15% déficit leve · 🔴 ≤ −16%
-                déficit severo · 🟣 +6% a +15% exceso leve · 🔵 &gt; +15% exceso
-                severo ·{" "}
-                <b>
-                  Haz click en cualquier semáforo para ver recomendaciones
-                  agronómicas.
-                </b>
+              <div
+                className="dp-nota"
+                style={{ lineHeight: "1.6", fontSize: "14px" }}
+              >
+                <p style={{ margin: "0 0 12px 0" }}>
+                  <b>Metodología:</b> La <em>media histórica</em> proviene del
+                  dataset Prec ETO Spatial (valores fijos por mes). La{" "}
+                  <em>precipitación real</em> es el acumulado mensual de datos
+                  diarios de Open-Meteo (archive API). El <b>% vs media</b> se
+                  calcula como <code>(real − media) / media × 100</code> para
+                  cada período seleccionado. El{" "}
+                  <b>dashboard climático diario</b> muestra precipitación
+                  diaria, temperatura, humedad y viento del mes seleccionado (o
+                  del mes actual si se elige "Todos los meses").
+                </p>
+                <div
+                  className="dp-semaforos-leyenda"
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "12px",
+                    margin: "14px 0",
+                    padding: "8px 0",
+                    borderTop: "1px dashed #ccc",
+                    borderBottom: "1px dashed #ccc",
+                  }}
+                >
+                  <span>
+                    🔴 <b>&lt; −50%</b> Déficit extremo
+                    <br />
+                    <small>Riesgo crítico de sequía.</small>
+                  </span>
+
+                  <span>
+                    🟠 <b>&ge; −50% y &lt; −30%</b> Déficit severo
+                    <br />
+                    <small>Alto riesgo de estrés hídrico.</small>
+                  </span>
+
+                  <span>
+                    🟡 <b>&ge; −30% y &lt; −10%</b> Déficit moderado
+                    <br />
+                    <small>Condiciones secas que requieren seguimiento.</small>
+                  </span>
+
+                  <span>
+                    🟢 <b>&ge; −10% y &le; 15%</b> Normal
+                    <br />
+                    <small>Variación dentro del comportamiento esperado.</small>
+                  </span>
+
+                  <span>
+                    🟣 <b>&gt; 15% y &le; 35%</b> Exceso moderado
+                    <br />
+                    <small>Lluvias superiores a lo normal.</small>
+                  </span>
+
+                  <span>
+                    🔵 <b>&gt; 35%</b> Exceso severo
+                    <br />
+                    <small>
+                      Riesgo de encharcamiento e incremento de enfermedades.
+                    </small>
+                  </span>
+                </div>
+                <p style={{ margin: "0", color: "#1a5376" }}>
+                  <b>
+                    💡 Haz click en cualquier semáforo para ver recomendaciones
+                    agronómicas.
+                  </b>
+                </p>
               </div>
+              {/* ── DIVISOR ── */}
+              <div className="dp-section-divider">
+                <div className="dp-section-divider-line" />
+                <div className="dp-section-divider-label">
+                  🌡️ Precipitación Diaria
+                </div>
+                <div className="dp-section-divider-line" />
+              </div>
+
+              {/* ── DASHBOARD CLIMÁTICO (filtros heredados) ── */}
+              <DashboardClimatico municipio={municipio} mes={mes} anio={anio} />
             </>
           )}
         </div>
